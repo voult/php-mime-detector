@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 
 namespace SoftCreatR\Tests\MimeDetector;
 
@@ -17,7 +16,7 @@ class MimeDetectorTest extends TestCaseImplementation
     /**
      * @return  MimeDetector
      */
-    public function getInstance(): MimeDetector
+    public function getInstance()
     {
         return MimeDetector::getInstance();
     }
@@ -25,20 +24,20 @@ class MimeDetectorTest extends TestCaseImplementation
     /**
      * @return  void
      */
-    public function testGetInstance(): void
+    public function testGetInstance()
     {
-        self::assertInstanceOf(MimeDetector::class, $this->getInstance());
+        self::assertInstanceOf('\SoftCreatR\MimeDetector\MimeDetector', $this->getInstance());
     }
 
     /**
      * Test, if `setFile` throws an exception, if the provided file does not exist.
      *
-     * @return  void
-     * @throws  MimeDetectorException
+     * @return              void
+     * @throws              MimeDetectorException
+     * @expectedException   \SoftCreatR\MimeDetector\MimeDetectorException
      */
-    public function testSetFileThrowsException(): void
+    public function testSetFileThrowsException()
     {
-        $this->expectException(MimeDetectorException::class);
         $this->getInstance()->setFile('nonexistant.file');
     }
 
@@ -48,7 +47,7 @@ class MimeDetectorTest extends TestCaseImplementation
      * @return          void
      * @throws          MimeDetectorException
      */
-    public function testSetFile($testFiles): void
+    public function testSetFile($testFiles)
     {
         $mimeDetector = $this->getInstance();
 
@@ -69,12 +68,12 @@ class MimeDetectorTest extends TestCaseImplementation
      * @throws  MimeDetectorException
      * @throws  ReflectionException
      */
-    public function testGetFileTypeReturnEmptyArrayWithoutByteCache(): void
+    public function testGetFileTypeReturnEmptyArrayWithoutByteCache()
     {
         $mimeDetector = $this->getInstance();
         $mimeDetector->setFile(__FILE__);
 
-        MimeDetectorTestUtil::setPrivateProperty($mimeDetector, 'byteCache', []);
+        MimeDetectorTestUtil::setPrivateProperty($mimeDetector, 'byteCache', array());
         MimeDetectorTestUtil::setPrivateProperty($mimeDetector, 'file', '');
         MimeDetectorTestUtil::setPrivateProperty($mimeDetector, 'fileHash', '');
 
@@ -87,7 +86,7 @@ class MimeDetectorTest extends TestCaseImplementation
      * @return  void
      * @throws  MimeDetectorException
      */
-    public function testGetFileTypeReturnEmptyArrayWithUnknownFileType(): void
+    public function testGetFileTypeReturnEmptyArrayWithUnknownFileType()
     {
         self::assertEmpty($this->getInstance()->setFile(__FILE__)->getFileType());
     }
@@ -98,7 +97,7 @@ class MimeDetectorTest extends TestCaseImplementation
      * @return          void
      * @throws          MimeDetectorException
      */
-    public function testGetFileType(array $testFiles): void
+    public function testGetFileType(array $testFiles)
     {
         foreach ($testFiles as $testFile) {
             $fileData = $this->getInstance()->setFile($testFile['file'])->getFileType();
@@ -114,7 +113,7 @@ class MimeDetectorTest extends TestCaseImplementation
      * @return          void
      * @throws          MimeDetectorException
      */
-    public function testGetFileExtensionEmpty(): void
+    public function testGetFileExtensionEmpty()
     {
         self::assertEmpty($this->getInstance()->setFile(__FILE__)->getFileExtension());
     }
@@ -125,7 +124,7 @@ class MimeDetectorTest extends TestCaseImplementation
      * @return          void
      * @throws          MimeDetectorException
      */
-    public function testGetFileExtension(array $testFiles): void
+    public function testGetFileExtension(array $testFiles)
     {
         foreach ($testFiles as $testFile) {
             self::assertSame($testFile['ext'], $this->getInstance()->setFile($testFile['file'])->getFileExtension());
@@ -139,7 +138,7 @@ class MimeDetectorTest extends TestCaseImplementation
      * @return          void
      * @throws          MimeDetectorException
      */
-    public function testGetMimeTypeEmpty(): void
+    public function testGetMimeTypeEmpty()
     {
         self::assertEmpty($this->getInstance()->setFile(__FILE__)->getMimeType());
     }
@@ -150,7 +149,7 @@ class MimeDetectorTest extends TestCaseImplementation
      * @return          void
      * @throws          MimeDetectorException
      */
-    public function testGetMimeType(array $testFiles): void
+    public function testGetMimeType(array $testFiles)
     {
         foreach ($testFiles as $testFile) {
             // we don't know the mime type of our test file, so we'll just check, if any mimetype has been detected
@@ -164,7 +163,7 @@ class MimeDetectorTest extends TestCaseImplementation
      * @return  void
      * @throws  MimeDetectorException
      */
-    public function testGetFontAwesomeIcon(array $fontAwesomeIcons): void
+    public function testGetFontAwesomeIcon(array $fontAwesomeIcons)
     {
         foreach ($fontAwesomeIcons as $mimeType => $params) {
             self::assertSame('fa ' . $params[0], $this->getInstance()->getFontAwesomeIcon($mimeType, $params[1]));
@@ -181,7 +180,7 @@ class MimeDetectorTest extends TestCaseImplementation
      *
      * @return void
      */
-    public function testGetHashFile(): void
+    public function testGetHashFile()
     {
         self::assertNotFalse($this->getInstance()->getHash(__FILE__));
     }
@@ -189,7 +188,7 @@ class MimeDetectorTest extends TestCaseImplementation
     /**
      * @return void
      */
-    public function testGetHash(): void
+    public function testGetHash()
     {
         self::assertSame('569121d1', $this->getInstance()->getHash('php'));
     }
@@ -197,9 +196,9 @@ class MimeDetectorTest extends TestCaseImplementation
     /**
      * @return void
      */
-    public function testToBytes(): void
+    public function testToBytes()
     {
-        self::assertEquals([112, 104, 112], $this->getInstance()->toBytes('php'));
+        self::assertEquals(array(112, 104, 112), $this->getInstance()->toBytes('php'));
     }
 
     /**
@@ -207,7 +206,7 @@ class MimeDetectorTest extends TestCaseImplementation
      * @throws  ReflectionException
      * @throws  MimeDetectorException
      */
-    public function testCheckString(): void
+    public function testCheckString()
     {
         $mimeDetector = $this->getInstance();
         $mimeDetector->setFile(__FILE__);
@@ -223,7 +222,7 @@ class MimeDetectorTest extends TestCaseImplementation
      * @throws  MimeDetectorException
      * @throws  ReflectionException
      */
-    public function testSearchForBytesNegative(): void
+    public function testSearchForBytesNegative()
     {
         $mimeDetector = $this->getInstance();
         $mimeDetector->setFile(__FILE__);
@@ -237,7 +236,7 @@ class MimeDetectorTest extends TestCaseImplementation
      * @throws  MimeDetectorException
      * @throws  ReflectionException
      */
-    public function testSearchForBytes(): void
+    public function testSearchForBytes()
     {
         $mimeDetector = $this->getInstance();
         $mimeDetector->setFile(__FILE__);
@@ -253,13 +252,13 @@ class MimeDetectorTest extends TestCaseImplementation
      * @throws  MimeDetectorException
      * @throws  ReflectionException
      */
-    public function testCheckForBytesFalse(): void
+    public function testCheckForBytesFalse()
     {
         $mimeDetector = $this->getInstance();
         $mimeDetector->setFile(__FILE__);
         $method = MimeDetectorTestUtil::getProtectedMethod($mimeDetector, 'checkForBytes');
 
-        self::assertFalse($method->invoke($mimeDetector, []));
+        self::assertFalse($method->invoke($mimeDetector, array()));
     }
 
     /**
@@ -267,7 +266,7 @@ class MimeDetectorTest extends TestCaseImplementation
      * @throws  MimeDetectorException
      * @throws  ReflectionException
      */
-    public function testCheckForBytes(): void
+    public function testCheckForBytes()
     {
         $mimeDetector = $this->getInstance();
         $mimeDetector->setFile(__FILE__);
@@ -283,7 +282,7 @@ class MimeDetectorTest extends TestCaseImplementation
      * @throws  MimeDetectorException
      * @throws  ReflectionException
      */
-    public function testCreateByteCacheNull(): void
+    public function testCreateByteCacheNull()
     {
         $mimeDetector = $this->getInstance();
         $mimeDetector->setFile(__FILE__);
@@ -298,15 +297,14 @@ class MimeDetectorTest extends TestCaseImplementation
      * @return  void
      * @throws  MimeDetectorException
      * @throws  ReflectionException
+     * @expectedException   \SoftCreatR\MimeDetector\MimeDetectorException
      */
-    public function testCreateByteCacheException(): void
+    public function testCreateByteCacheException()
     {
-        $this->expectException(MimeDetectorException::class);
-
         $mimeDetector = $this->getInstance();
         $mimeDetector->setFile(__FILE__);
 
-        MimeDetectorTestUtil::setPrivateProperty($mimeDetector, 'byteCache', []);
+        MimeDetectorTestUtil::setPrivateProperty($mimeDetector, 'byteCache', array());
         MimeDetectorTestUtil::setPrivateProperty($mimeDetector, 'file', '');
         MimeDetectorTestUtil::setPrivateProperty($mimeDetector, 'fileHash', '');
 
@@ -319,21 +317,21 @@ class MimeDetectorTest extends TestCaseImplementation
      *
      * @return array
      */
-    public function provideTestFiles(): array
+    public function provideTestFiles()
     {
-        $files = [];
+        $files = array();
 
         foreach (new DirectoryIterator(__DIR__ . '/fixtures') as $file) {
             if ($file->isFile() && $file->getBasename() !== '.git') {
-                $files[$file->getBasename()] = [
+                $files[$file->getBasename()] = array(
                     'file' => $file->getPathname(),
                     'hash' => $this->getInstance()->getHash($file->getPathname()),
                     'ext' => $file->getExtension()
-                ];
+                );
             }
         }
 
-        return [[$files]];
+        return array(array($files));
     }
 
     /**
@@ -341,27 +339,27 @@ class MimeDetectorTest extends TestCaseImplementation
      *
      * @return array
      */
-    public function provideFontAwesomeIcons(): array
+    public function provideFontAwesomeIcons()
     {
-        return [[[
-            'application/application/vnd.oasis.opendocument.spreadsheet' => ['fa-file-excel-o', false],
-            'application/gzip' => ['fa-file-archive-o', false],
-            'application/json' => ['fa-file-code-o', false],
-            'application/msword' => ['fa-file-word-o', false],
-            'application/pdf' => ['fa-file-pdf-o', false],
-            'application/vnd.ms-excel' => ['fa-file-excel-o', false],
-            'application/vnd.ms-powerpoint' => ['fa-file-powerpoint-o', false],
-            'application/vnd.ms-word' => ['fa-file-word-o', false],
-            'application/vnd.oasis.opendocument.presentation' => ['fa-file-powerpoint-o', false],
-            'application/vnd.oasis.opendocument.spreadsheet' => ['fa-file-excel-o', false],
-            'application/vnd.oasis.opendocument.text' => ['fa-file-word-o', false],
-            'application/vnd.openxmlformats-officedocument.presentationml' => ['fa-file-powerpoint-o', false],
-            'application/vnd.openxmlformats-officedocument.spreadsheetml' => ['fa-file-excel-o', false],
-            'application/vnd.openxmlformats-officedocument.wordprocessingml' => ['fa-file-word-o', false],
-            'application/zip' => ['fa-file-archive-o', false],
-            'audio' => ['fa-file-audio-o', false],
-            'image' => ['fa-file-image-o', false],
-            'video' => ['fa-file-video-o', false]
-        ]]];
+        return array(array(array(
+            'application/application/vnd.oasis.opendocument.spreadsheet' => array('fa-file-excel-o', false),
+            'application/gzip' => array('fa-file-archive-o', false),
+            'application/json' => array('fa-file-code-o', false),
+            'application/msword' => array('fa-file-word-o', false),
+            'application/pdf' => array('fa-file-pdf-o', false),
+            'application/vnd.ms-excel' => array('fa-file-excel-o', false),
+            'application/vnd.ms-powerpoint' => array('fa-file-powerpoint-o', false),
+            'application/vnd.ms-word' => array('fa-file-word-o', false),
+            'application/vnd.oasis.opendocument.presentation' => array('fa-file-powerpoint-o', false),
+            'application/vnd.oasis.opendocument.spreadsheet' => array('fa-file-excel-o', false),
+            'application/vnd.oasis.opendocument.text' => array('fa-file-word-o', false),
+            'application/vnd.openxmlformats-officedocument.presentationml' => array('fa-file-powerpoint-o', false),
+            'application/vnd.openxmlformats-officedocument.spreadsheetml' => array('fa-file-excel-o', false),
+            'application/vnd.openxmlformats-officedocument.wordprocessingml' => array('fa-file-word-o', false),
+            'application/zip' => array('fa-file-archive-o', false),
+            'audio' => array('fa-file-audio-o', false),
+            'image' => array('fa-file-image-o', false),
+            'video' => array('fa-file-video-o', false)
+        )));
     }
 }

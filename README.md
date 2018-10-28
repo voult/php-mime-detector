@@ -1,8 +1,4 @@
-# PHP Mime Detector [![Build Status](https://travis-ci.com/SoftCreatR/php-mime-detector.svg?branch=master)](https://travis-ci.com/SoftCreatR/php-mime-detector) [![Codeship Status for SoftCreatR/php-mime-detector](https://app.codeship.com/projects/9ed81740-b269-0136-7bd2-3ad13aca57c1/status?branch=master)](https://app.codeship.com/projects/310674)
-
-[![CodeFactor](https://www.codefactor.io/repository/github/softcreatr/php-mime-detector/badge)](https://www.codefactor.io/repository/github/softcreatr/php-mime-detector)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/4d404e53d8ec465197a38d9b15c4746e)](https://www.codacy.com/app/SoftCreatR/php-mime-detector?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=SoftCreatR/php-mime-detector&amp;utm_campaign=Badge_Grade)
-[![codecov](https://codecov.io/gh/SoftCreatR/php-mime-detector/branch/master/graph/badge.svg)](https://codecov.io/gh/SoftCreatR/mime-detector)
+# PHP Mime Detector (for PHP 5.3 - PHP 7.0)
 
 Detecting the real type of a (binary) file doesn't have to be hard. Checking a file's extension is not reliable and can cause serious security issues.
 
@@ -26,7 +22,7 @@ Short answer: I have just little experience in unit testing. This project was a 
 
 ## Requirements
 
--   PHP 7.1 or newer
+-   PHP 5.3.2 or newer
 -   [Composer](https://getcomposer.org)
 
 ## Installation
@@ -34,7 +30,7 @@ Short answer: I have just little experience in unit testing. This project was a 
 Require this package using [Composer](https://getcomposer.org/), in the root directory of your project:
 
 ``` bash
-$ composer require softcreatr/php-mime-detector
+$ composer require softcreatr/php-mime-detector:dev-oldphp
 ```
 
 ## Usage
@@ -75,6 +71,7 @@ However, you may check out a bunch of test files for a full test. Test files are
 ``` bash
 $ git clone https://github.com/SoftCreatR/php-mime-detector
 $ cd php-mime-detector
+$ git checkout oldphp
 $ git submodule update --init --recursive
 ```
 

@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 
 namespace SoftCreatR\MimeDetector;
 
@@ -24,7 +23,7 @@ class MimeDetector
      *
      * @var array
      */
-    private $byteCache = [];
+    private $byteCache = array();
 
     /**
      * Number of cached bytes
@@ -52,7 +51,7 @@ class MimeDetector
      *
      * @var array
      */
-    protected $fontAwesomeIcons = [
+    protected $fontAwesomeIcons = array(
         'application/application/vnd.oasis.opendocument.spreadsheet' => 'fa-file-excel-o',
         'application/gzip' => 'fa-file-archive-o',
         'application/json' => 'fa-file-code-o',
@@ -71,7 +70,7 @@ class MimeDetector
         'audio' => 'fa-file-audio-o',
         'image' => 'fa-file-image-o',
         'video' => 'fa-file-video-o'
-    ];
+    );
 
     /**
      * Singletons do not support a public constructor. Override init() if
@@ -118,7 +117,7 @@ class MimeDetector
      *
      * @return  MimeDetector
      */
-    public static function getInstance(): MimeDetector
+    public static function getInstance()
     {
         // @codeCoverageIgnoreStart
         if (empty(self::$instance)) {
@@ -136,7 +135,7 @@ class MimeDetector
      * @return  MimeDetector
      * @throws  MimeDetectorException
      */
-    public function setFile(string $filePath): MimeDetector
+    public function setFile($filePath)
     {
         if (!file_exists($filePath)) {
             throw new MimeDetectorException("File '" . $filePath . "' does not exist.");
@@ -145,7 +144,7 @@ class MimeDetector
         $fileHash = $this->getHash($filePath);
 
         if ($this->fileHash !== $fileHash) {
-            $this->byteCache = [];
+            $this->byteCache = array();
             $this->byteCacheLen = 0;
             $this->file = $filePath;
             $this->fileHash = $fileHash;
@@ -161,133 +160,133 @@ class MimeDetector
      *
      * @return  array
      */
-    public function getFileType(): array
+    public function getFileType()
     {
         if (empty($this->byteCache)) {
-            return [];
+            return array();
         }
 
         // Perform check
-        if ($this->checkForBytes([0xFF, 0xD8, 0xFF])) {
-            return [
+        if ($this->checkForBytes(array(0xFF, 0xD8, 0xFF))) {
+            return array(
                 'ext' => 'jpg',
                 'mime' => 'image/jpeg'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])) {
-            return [
+        if ($this->checkForBytes(array(0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A))) {
+            return array(
                 'ext' => 'png',
                 'mime' => 'image/png'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x47, 0x49, 0x46])) {
-            return [
+        if ($this->checkForBytes(array(0x47, 0x49, 0x46))) {
+            return array(
                 'ext' => 'gif',
                 'mime' => 'image/gif'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x57, 0x45, 0x42, 0x50], 8)) {
-            return [
+        if ($this->checkForBytes(array(0x57, 0x45, 0x42, 0x50), 8)) {
+            return array(
                 'ext' => 'webp',
                 'mime' => 'image/webp'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x46, 0x4C, 0x49, 0x46])) {
-            return [
+        if ($this->checkForBytes(array(0x46, 0x4C, 0x49, 0x46))) {
+            return array(
                 'ext' => 'flif',
                 'mime' => 'image/flif'
-            ];
+            );
         }
 
         // Needs to be before `tif` check
         if ((
-                $this->checkForBytes([0x49, 0x49, 0x2A, 0x0]) ||
-                $this->checkForBytes([0x4D, 0x4D, 0x0, 0x2A])
-            ) && $this->checkForBytes([0x43, 0x52], 8)
+                $this->checkForBytes(array(0x49, 0x49, 0x2A, 0x0)) ||
+                $this->checkForBytes(array(0x4D, 0x4D, 0x0, 0x2A))
+            ) && $this->checkForBytes(array(0x43, 0x52), 8)
         ) {
-            return [
+            return array(
                 'ext' => 'cr2',
                 'mime' => 'image/x-canon-cr2'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x49, 0x49, 0x2A, 0x0]) ||
-            $this->checkForBytes([0x4D, 0x4D, 0x0, 0x2A])
+        if ($this->checkForBytes(array(0x49, 0x49, 0x2A, 0x0)) ||
+            $this->checkForBytes(array(0x4D, 0x4D, 0x0, 0x2A))
         ) {
-            return [
+            return array(
                 'ext' => 'tif',
                 'mime' => 'image/tiff'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x42, 0x4D])) {
-            return [
+        if ($this->checkForBytes(array(0x42, 0x4D))) {
+            return array(
                 'ext' => 'bmp',
                 'mime' => 'image/bmp'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x49, 0x49, 0xBC])) {
-            return [
+        if ($this->checkForBytes(array(0x49, 0x49, 0xBC))) {
+            return array(
                 'ext' => 'jxr',
                 'mime' => 'image/vnd.ms-photo'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x38, 0x42, 0x50, 0x53])) {
-            return [
+        if ($this->checkForBytes(array(0x38, 0x42, 0x50, 0x53))) {
+            return array(
                 'ext' => 'psd',
                 'mime' => 'image/vnd.adobe.photoshop'
-            ];
+            );
         }
 
         // Zip-based file formats
         // Need to be before the `zip` check
-        if ($this->checkForBytes([0x50, 0x4B, 0x3, 0x4])) {
-            if ($this->checkForBytes([
-                    0x6D, 0x69, 0x6D, 0x65, 0x74, 0x79, 0x70,
-                    0x65, 0x61, 0x70, 0x70, 0x6C, 0x69, 0x63,
-                    0x61, 0x74, 0x69, 0x6F, 0x6E, 0x2F, 0x65,
-                    0x70, 0x75, 0x62, 0x2B, 0x7A, 0x69, 0x70
-                ], 30)
+        if ($this->checkForBytes(array(0x50, 0x4B, 0x3, 0x4))) {
+            if ($this->checkForBytes(array(
+                0x6D, 0x69, 0x6D, 0x65, 0x74, 0x79, 0x70,
+                0x65, 0x61, 0x70, 0x70, 0x6C, 0x69, 0x63,
+                0x61, 0x74, 0x69, 0x6F, 0x6E, 0x2F, 0x65,
+                0x70, 0x75, 0x62, 0x2B, 0x7A, 0x69, 0x70
+            ), 30)
             ) {
-                return [
+                return array(
                     'ext' => 'epub',
                     'mime' => 'application/epub+zip'
-                ];
+                );
             }
 
             // Assumes signed `.xpi` from addons.mozilla.org
             if ($this->checkString('META-INF/mozilla.rsa', 30)) {
-                return [
+                return array(
                     'ext' => 'xpi',
                     'mime' => 'application/x-xpinstall'
-                ];
+                );
             }
 
             if ($this->checkString('mimetypeapplication/vnd.oasis.opendocument.text', 30)) {
-                return [
+                return array(
                     'ext' => 'odt',
                     'mime' => 'application/vnd.oasis.opendocument.text'
-                ];
+                );
             }
 
             if ($this->checkString('mimetypeapplication/vnd.oasis.opendocument.spreadsheet', 30)) {
-                return [
+                return array(
                     'ext' => 'ods',
                     'mime' => 'application/vnd.oasis.opendocument.spreadsheet'
-                ];
+                );
             }
 
             if ($this->checkString('mimetypeapplication/vnd.oasis.opendocument.presentation', 30)) {
-                return [
+                return array(
                     'ext' => 'odp',
                     'mime' => 'application/vnd.oasis.opendocument.presentation'
-                ];
+                );
             }
 
             // The docx, xlsx and pptx file types extend the Office Open XML file format:
@@ -307,20 +306,20 @@ class MimeDetector
 
                 if (!$type) {
                     if ($this->checkString('word/', $offset)) {
-                        $type = [
+                        $type = array(
                             'ext' => 'docx',
                             'mime' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-                        ];
+                        );
                     } elseif ($this->checkString('ppt/', $offset)) {
-                        $type = [
+                        $type = array(
                             'ext' => 'pptx',
                             'mime' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
-                        ];
+                        );
                     } elseif ($this->checkString('xl/', $offset)) {
-                        $type = [
+                        $type = array(
                             'ext' => 'xlsx',
                             'mime' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-                        ];
+                        );
                     }
                 }
 
@@ -328,7 +327,7 @@ class MimeDetector
                     return $type;
                 }
 
-                $zipHeaderIndex = $this->searchForBytes([0x50, 0x4B, 0x03, 0x04], $offset);
+                $zipHeaderIndex = $this->searchForBytes(array(0x50, 0x4B, 0x03, 0x04), $offset);
             } while ($zipHeaderIndex !== -1);
 
             // No more zip parts available in the buffer, but maybe we are almost certain about the type?
@@ -337,640 +336,640 @@ class MimeDetector
             }
         }
 
-        if ($this->checkForBytes([0x50, 0x4B, 0x3, 0x4])) {
-            return [
+        if ($this->checkForBytes(array(0x50, 0x4B, 0x3, 0x4))) {
+            return array(
                 'ext' => 'zip',
                 'mime' => 'application/zip'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x75, 0x73, 0x74, 0x61, 0x72], 257)) {
-            return [
+        if ($this->checkForBytes(array(0x75, 0x73, 0x74, 0x61, 0x72), 257)) {
+            return array(
                 'ext' => 'tar',
                 'mime' => 'application/x-tar'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x52, 0x61, 0x72, 0x21, 0x1A, 0x7]) &&
+        if ($this->checkForBytes(array(0x52, 0x61, 0x72, 0x21, 0x1A, 0x7)) &&
             (
                 $this->byteCache[6] === 0x0 ||
                 $this->byteCache[6] === 0x1
             )
         ) {
-            return [
+            return array(
                 'ext' => 'rar',
                 'mime' => 'application/x-rar-compressed'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x1F, 0x8B, 0x8])) {
-            return [
+        if ($this->checkForBytes(array(0x1F, 0x8B, 0x8))) {
+            return array(
                 'ext' => 'gz',
                 'mime' => 'application/gzip'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x42, 0x5A, 0x68])) {
-            return [
+        if ($this->checkForBytes(array(0x42, 0x5A, 0x68))) {
+            return array(
                 'ext' => 'bz2',
                 'mime' => 'application/x-bzip2'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C])) {
-            return [
+        if ($this->checkForBytes(array(0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C))) {
+            return array(
                 'ext' => '7z',
                 'mime' => 'application/x-7z-compressed'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x78, 0x01])) {
-            return [
+        if ($this->checkForBytes(array(0x78, 0x01))) {
+            return array(
                 'ext' => 'dmg',
                 'mime' => 'application/x-apple-diskimage'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x33, 0x67, 0x70, 0x35]) || // 3gp5
+        if ($this->checkForBytes(array(0x33, 0x67, 0x70, 0x35)) || // 3gp5
             (
-                $this->checkForBytes([0x0, 0x0, 0x0]) &&
-                $this->checkForBytes([0x66, 0x74, 0x79, 0x70], 4) &&
+                $this->checkForBytes(array(0x0, 0x0, 0x0)) &&
+                $this->checkForBytes(array(0x66, 0x74, 0x79, 0x70), 4) &&
                 (
-                    $this->checkForBytes([0x6D, 0x70, 0x34, 0x31], 8) || // MP41
-                    $this->checkForBytes([0x6D, 0x70, 0x34, 0x32], 8) || // MP42
-                    $this->checkForBytes([0x69, 0x73, 0x6F, 0x6D], 8) || // ISOM
-                    $this->checkForBytes([0x69, 0x73, 0x6F, 0x32], 8) || // ISO2
-                    $this->checkForBytes([0x6D, 0x6D, 0x70, 0x34], 8) || // MMP4
-                    $this->checkForBytes([0x4D, 0x34, 0x56], 8) || // M4V
-                    $this->checkForBytes([0x64, 0x61, 0x73, 0x68], 8) // DASH
+                    $this->checkForBytes(array(0x6D, 0x70, 0x34, 0x31), 8) || // MP41
+                    $this->checkForBytes(array(0x6D, 0x70, 0x34, 0x32), 8) || // MP42
+                    $this->checkForBytes(array(0x69, 0x73, 0x6F, 0x6D), 8) || // ISOM
+                    $this->checkForBytes(array(0x69, 0x73, 0x6F, 0x32), 8) || // ISO2
+                    $this->checkForBytes(array(0x6D, 0x6D, 0x70, 0x34), 8) || // MMP4
+                    $this->checkForBytes(array(0x4D, 0x34, 0x56), 8) || // M4V
+                    $this->checkForBytes(array(0x64, 0x61, 0x73, 0x68), 8) // DASH
                 )
             )
         ) {
-            return [
+            return array(
                 'ext' => 'mp4',
                 'mime' => 'video/mp4'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x4D, 0x54, 0x68, 0x64])) {
-            return [
+        if ($this->checkForBytes(array(0x4D, 0x54, 0x68, 0x64))) {
+            return array(
                 'ext' => 'mid',
                 'mime' => 'audio/midi'
-            ];
+            );
         }
 
         // https://github.com/threatstack/libmagic/blob/master/magic/Magdir/matroska
-        if ($this->checkForBytes([0x1A, 0x45, 0xDF, 0xA3])) {
-            $idPos = $this->searchForBytes([0x42, 0x82]);
+        if ($this->checkForBytes(array(0x1A, 0x45, 0xDF, 0xA3))) {
+            $idPos = $this->searchForBytes(array(0x42, 0x82));
 
             if ($idPos !== -1) {
                 if ($this->checkString('matroska', $idPos + 3)) {
-                    return [
+                    return array(
                         'ext' => 'mkv',
                         'mime' => 'video/x-matroska'
-                    ];
+                    );
                 }
 
                 if ($this->checkString('webm', $idPos + 3)) {
-                    return [
+                    return array(
                         'ext' => 'webm',
                         'mime' => 'video/webm'
-                    ];
+                    );
                 }
             }
         }
 
-        if ($this->checkForBytes([0x0, 0x0, 0x0, 0x14, 0x66, 0x74, 0x79, 0x70, 0x71, 0x74, 0x20, 0x20]) ||
-            $this->checkForBytes([0x66, 0x72, 0x65, 0x65], 4) ||
-            $this->checkForBytes([0x66, 0x74, 0x79, 0x70, 0x71, 0x74, 0x20, 0x20], 4) ||
-            $this->checkForBytes([0x6D, 0x64, 0x61, 0x74], 4) || // MJPEG
-            $this->checkForBytes([0x6D, 0x6F, 0x6F, 0x76], 4) || // Moov
-            $this->checkForBytes([0x77, 0x69, 0x64, 0x65], 4)
+        if ($this->checkForBytes(array(0x0, 0x0, 0x0, 0x14, 0x66, 0x74, 0x79, 0x70, 0x71, 0x74, 0x20, 0x20)) ||
+            $this->checkForBytes(array(0x66, 0x72, 0x65, 0x65), 4) ||
+            $this->checkForBytes(array(0x66, 0x74, 0x79, 0x70, 0x71, 0x74, 0x20, 0x20), 4) ||
+            $this->checkForBytes(array(0x6D, 0x64, 0x61, 0x74), 4) || // MJPEG
+            $this->checkForBytes(array(0x6D, 0x6F, 0x6F, 0x76), 4) || // Moov
+            $this->checkForBytes(array(0x77, 0x69, 0x64, 0x65), 4)
         ) {
-            return [
+            return array(
                 'ext' => 'mov',
                 'mime' => 'video/quicktime'
-            ];
+            );
         }
 
         // RIFF file format which might be AVI, WAV, QCP, etc
-        if ($this->checkForBytes([0x52, 0x49, 0x46, 0x46])) {
-            if ($this->checkForBytes([0x41, 0x56, 0x49], 8)) {
-                return [
+        if ($this->checkForBytes(array(0x52, 0x49, 0x46, 0x46))) {
+            if ($this->checkForBytes(array(0x41, 0x56, 0x49), 8)) {
+                return array(
                     'ext' => 'avi',
                     'mime' => 'video/vnd.avi'
-                ];
+                );
             }
 
-            if ($this->checkForBytes([0x57, 0x41, 0x56, 0x45], 8)) {
-                return [
+            if ($this->checkForBytes(array(0x57, 0x41, 0x56, 0x45), 8)) {
+                return array(
                     'ext' => 'wav',
                     'mime' => 'audio/vnd.wave'
-                ];
+                );
             }
 
             // QLCM, QCP file
-            if ($this->checkForBytes([0x51, 0x4C, 0x43, 0x4D], 8)) {
-                return [
+            if ($this->checkForBytes(array(0x51, 0x4C, 0x43, 0x4D), 8)) {
+                return array(
                     'ext' => 'qcp',
                     'mime' => 'audio/qcelp'
-                ];
+                );
             }
         }
 
-        if ($this->checkForBytes([0x30, 0x26, 0xB2, 0x75, 0x8E, 0x66, 0xCF, 0x11, 0xA6, 0xD9])) {
-            return [
+        if ($this->checkForBytes(array(0x30, 0x26, 0xB2, 0x75, 0x8E, 0x66, 0xCF, 0x11, 0xA6, 0xD9))) {
+            return array(
                 'ext' => 'wmv',
                 'mime' => 'video/x-ms-wmv'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x0, 0x0, 0x1, 0xBA]) || $this->checkForBytes([0x0, 0x0, 0x1, 0xB3])) {
-            return [
+        if ($this->checkForBytes(array(0x0, 0x0, 0x1, 0xBA)) || $this->checkForBytes(array(0x0, 0x0, 0x1, 0xB3))) {
+            return array(
                 'ext' => 'mpg',
                 'mime' => 'video/mpeg'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x66, 0x74, 0x79, 0x70, 0x33, 0x67], 4)) {
-            return [
+        if ($this->checkForBytes(array(0x66, 0x74, 0x79, 0x70, 0x33, 0x67), 4)) {
+            return array(
                 'ext' => '3gp',
                 'mime' => 'video/3gpp'
-            ];
+            );
         }
 
         // Check for MPEG header at different starting offsets
         for ($offset = 0; ($offset < 2 && $offset < ($this->byteCacheLen - 16)); $offset++) {
-            if ($this->checkForBytes([0x49, 0x44, 0x33], $offset) || // ID3 header
-                $this->checkForBytes([0xFF, 0xE2], $offset, [0xFF, 0xE2]) // MPEG 1 or 2 Layer 3 header
+            if ($this->checkForBytes(array(0x49, 0x44, 0x33), $offset) || // ID3 header
+                $this->checkForBytes(array(0xFF, 0xE2), $offset, array(0xFF, 0xE2)) // MPEG 1 or 2 Layer 3 header
             ) {
-                return [
+                return array(
                     'ext' => 'mp3',
                     'mime' => 'audio/mpeg'
-                ];
+                );
             }
 
             // MPEG 1 or 2 Layer 2 header
-            if ($this->checkForBytes([0xFF, 0xE4], $offset, [0xFF, 0xE4])) {
-                return [
+            if ($this->checkForBytes(array(0xFF, 0xE4), $offset, array(0xFF, 0xE4))) {
+                return array(
                     'ext' => 'mp2',
                     'mime' => 'audio/mpeg'
-                ];
+                );
             }
 
             // MPEG 2 layer 0 using ADTS
-            if ($this->checkForBytes([0xFF, 0xF8], $offset, [0xFF, 0xFC])) {
-                return [
+            if ($this->checkForBytes(array(0xFF, 0xF8), $offset, array(0xFF, 0xFC))) {
+                return array(
                     'ext' => 'mp2',
                     'mime' => 'audio/mpeg'
-                ];
+                );
             }
 
             // MPEG 4 layer 0 using ADTS
-            if ($this->checkForBytes([0xFF, 0xF0], $offset, [0xFF, 0xFC])) {
-                return [
+            if ($this->checkForBytes(array(0xFF, 0xF0), $offset, array(0xFF, 0xFC))) {
+                return array(
                     'ext' => 'mp4',
                     'mime' => 'audio/mpeg'
-                ];
+                );
             }
         }
 
-        if ($this->checkForBytes([0x66, 0x74, 0x79, 0x70, 0x4D, 0x34, 0x41], 4) ||
-            $this->checkForBytes([0x4D, 0x34, 0x41, 0x20])
+        if ($this->checkForBytes(array(0x66, 0x74, 0x79, 0x70, 0x4D, 0x34, 0x41), 4) ||
+            $this->checkForBytes(array(0x4D, 0x34, 0x41, 0x20))
         ) {
-            return [ // MPEG-4 layer 3 (audio)
+            return array( // MPEG-4 layer 3 (audio)
                 'ext' => 'm4a',
                 'mime' => 'audio/mp4' // RFC 4337
-            ];
+            );
         }
 
         // Needs to be before `ogg` check
-        if ($this->checkForBytes([0x4F, 0x70, 0x75, 0x73, 0x48, 0x65, 0x61, 0x64], 28)) {
-            return [
+        if ($this->checkForBytes(array(0x4F, 0x70, 0x75, 0x73, 0x48, 0x65, 0x61, 0x64), 28)) {
+            return array(
                 'ext' => 'opus',
                 'mime' => 'audio/opus'
-            ];
+            );
         }
 
         // If 'OggS' in first  bytes, then OGG container
-        if ($this->checkForBytes([0x4F, 0x67, 0x67, 0x53])) {
+        if ($this->checkForBytes(array(0x4F, 0x67, 0x67, 0x53))) {
             // This is a OGG container
 
             // If ' theora' in header.
-            if ($this->checkForBytes([0x80, 0x74, 0x68, 0x65, 0x6F, 0x72, 0x61], 28)) {
-                return [
+            if ($this->checkForBytes(array(0x80, 0x74, 0x68, 0x65, 0x6F, 0x72, 0x61), 28)) {
+                return array(
                     'ext' => 'ogv',
                     'mime' => 'video/ogg'
-                ];
+                );
             }
 
             // If '\x01video' in header.
-            if ($this->checkForBytes([0x01, 0x76, 0x69, 0x64, 0x65, 0x6F, 0x00], 28)) {
-                return [
+            if ($this->checkForBytes(array(0x01, 0x76, 0x69, 0x64, 0x65, 0x6F, 0x00), 28)) {
+                return array(
                     'ext' => 'ogm',
                     'mime' => 'video/ogg'
-                ];
+                );
             }
 
             // If ' FLAC' in header  https://xiph.org/flac/faq.html
-            if ($this->checkForBytes([0x7F, 0x46, 0x4C, 0x41, 0x43], 28)) {
-                return [
+            if ($this->checkForBytes(array(0x7F, 0x46, 0x4C, 0x41, 0x43), 28)) {
+                return array(
                     'ext' => 'oga',
                     'mime' => 'audio/ogg'
-                ];
+                );
             }
 
             // 'Speex  ' in header https://en.wikipedia.org/wiki/Speex
-            if ($this->checkForBytes([0x53, 0x70, 0x65, 0x65, 0x78, 0x20, 0x20], 28)) {
-                return [
+            if ($this->checkForBytes(array(0x53, 0x70, 0x65, 0x65, 0x78, 0x20, 0x20), 28)) {
+                return array(
                     'ext' => 'spx',
                     'mime' => 'audio/ogg'
-                ];
+                );
             }
 
             // If '\x01vorbis' in header
-            if ($this->checkForBytes([0x01, 0x76, 0x6F, 0x72, 0x62, 0x69, 0x73], 28)) {
-                return [
+            if ($this->checkForBytes(array(0x01, 0x76, 0x6F, 0x72, 0x62, 0x69, 0x73), 28)) {
+                return array(
                     'ext' => 'ogg',
                     'mime' => 'audio/ogg'
-                ];
+                );
             }
 
             // Default OGG container https://www.iana.org/assignments/media-types/application/ogg
             // @codeCoverageIgnoreStart
-            return [
+            return array(
                 'ext' => 'ogx',
                 'mime' => 'application/ogg'
-            ];
+            );
             // @codeCoverageIgnoreEnd
         }
 
-        if ($this->checkForBytes([0x66, 0x4C, 0x61, 0x43])) {
-            return [
+        if ($this->checkForBytes(array(0x66, 0x4C, 0x61, 0x43))) {
+            return array(
                 'ext' => 'flac',
                 'mime' => 'audio/x-flac'
-            ];
+            );
         }
 
         // 'MAC '
-        if ($this->checkForBytes([0x4D, 0x41, 0x43, 0x20])) {
-            return [
+        if ($this->checkForBytes(array(0x4D, 0x41, 0x43, 0x20))) {
+            return array(
                 'ext' => 'ape',
                 'mime' => 'audio/ape'
-            ];
+            );
         }
 
         // 'wvpk'
-        if ($this->checkForBytes([0x77, 0x76, 0x70, 0x6B])) {
-            return [
+        if ($this->checkForBytes(array(0x77, 0x76, 0x70, 0x6B))) {
+            return array(
                 'ext' => 'wv',
                 'mime' => 'audio/wavpack'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x23, 0x21, 0x41, 0x4D, 0x52, 0x0A])) {
-            return [
+        if ($this->checkForBytes(array(0x23, 0x21, 0x41, 0x4D, 0x52, 0x0A))) {
+            return array(
                 'ext' => 'amr',
                 'mime' => 'audio/amr'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x25, 0x50, 0x44, 0x46])) {
-            return [
+        if ($this->checkForBytes(array(0x25, 0x50, 0x44, 0x46))) {
+            return array(
                 'ext' => 'pdf',
                 'mime' => 'application/pdf'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x4D, 0x5A])) {
-            return [
+        if ($this->checkForBytes(array(0x4D, 0x5A))) {
+            return array(
                 'ext' => 'exe',
                 'mime' => 'application/x-msdownload'
-            ];
+            );
         }
 
         if ((
                 $this->byteCache[0] === 0x43 || $this->byteCache[0] === 0x46
             ) &&
-            $this->checkForBytes([0x57, 0x53], 1)
+            $this->checkForBytes(array(0x57, 0x53), 1)
         ) {
-            return [
+            return array(
                 'ext' => 'swf',
                 'mime' => 'application/x-shockwave-flash'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x7B, 0x5C, 0x72, 0x74, 0x66])) {
-            return [
+        if ($this->checkForBytes(array(0x7B, 0x5C, 0x72, 0x74, 0x66))) {
+            return array(
                 'ext' => 'rtf',
                 'mime' => 'application/rtf'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x00, 0x61, 0x73, 0x6D])) {
-            return [
+        if ($this->checkForBytes(array(0x00, 0x61, 0x73, 0x6D))) {
+            return array(
                 'ext' => 'wasm',
                 'mime' => 'application/wasm'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x77, 0x4F, 0x46]) &&
+        if ($this->checkForBytes(array(0x77, 0x4F, 0x46)) &&
             (
-                $this->checkForBytes([0x00, 0x01, 0x00, 0x00], 4) ||
-                $this->checkForBytes([0x4F, 0x54, 0x54, 0x4F], 4)
+                $this->checkForBytes(array(0x00, 0x01, 0x00, 0x00), 4) ||
+                $this->checkForBytes(array(0x4F, 0x54, 0x54, 0x4F), 4)
             )
         ) {
             if ($this->byteCache[3] === 0x46) {
-                return [
+                return array(
                     'ext' => 'woff',
                     'mime' => 'font/woff'
-                ];
+                );
             }
 
             if ($this->byteCache[3] === 0x32) {
-                return [
+                return array(
                     'ext' => 'woff2',
                     'mime' => 'font/woff2'
-                ];
+                );
             }
         }
 
-        if ($this->checkForBytes([0x4C, 0x50], 34) &&
+        if ($this->checkForBytes(array(0x4C, 0x50), 34) &&
             (
-                $this->checkForBytes([0x00, 0x00, 0x01], 8) ||
-                $this->checkForBytes([0x01, 0x00, 0x02], 8) ||
-                $this->checkForBytes([0x02, 0x00, 0x02], 8)
+                $this->checkForBytes(array(0x00, 0x00, 0x01), 8) ||
+                $this->checkForBytes(array(0x01, 0x00, 0x02), 8) ||
+                $this->checkForBytes(array(0x02, 0x00, 0x02), 8)
             )
         ) {
-            return [
+            return array(
                 'ext' => 'eot',
                 'mime' => 'application/vnd.ms-fontobject'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x00, 0x01, 0x00, 0x00, 0x00])) {
-            return [
+        if ($this->checkForBytes(array(0x00, 0x01, 0x00, 0x00, 0x00))) {
+            return array(
                 'ext' => 'ttf',
                 'mime' => 'font/ttf'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x4F, 0x54, 0x54, 0x4F, 0x00])) {
-            return [
+        if ($this->checkForBytes(array(0x4F, 0x54, 0x54, 0x4F, 0x00))) {
+            return array(
                 'ext' => 'otf',
                 'mime' => 'font/otf'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x00, 0x00, 0x01, 0x00])) {
-            return [
+        if ($this->checkForBytes(array(0x00, 0x00, 0x01, 0x00))) {
+            return array(
                 'ext' => 'ico',
                 'mime' => 'image/x-icon'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x00, 0x00, 0x02, 0x00])) {
-            return [
+        if ($this->checkForBytes(array(0x00, 0x00, 0x02, 0x00))) {
+            return array(
                 'ext' => 'cur',
                 'mime' => 'image/x-icon'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x46, 0x4C, 0x56, 0x01])) {
-            return [
+        if ($this->checkForBytes(array(0x46, 0x4C, 0x56, 0x01))) {
+            return array(
                 'ext' => 'flv',
                 'mime' => 'video/x-flv'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x25, 0x21])) {
-            return [
+        if ($this->checkForBytes(array(0x25, 0x21))) {
+            return array(
                 'ext' => 'ps',
                 'mime' => 'application/postscript'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0xFD, 0x37, 0x7A, 0x58, 0x5A, 0x00])) {
-            return [
+        if ($this->checkForBytes(array(0xFD, 0x37, 0x7A, 0x58, 0x5A, 0x00))) {
+            return array(
                 'ext' => 'xz',
                 'mime' => 'application/x-xz'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x53, 0x51, 0x4C, 0x69])) {
-            return [
+        if ($this->checkForBytes(array(0x53, 0x51, 0x4C, 0x69))) {
+            return array(
                 'ext' => 'sqlite',
                 'mime' => 'application/x-sqlite3'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x4E, 0x45, 0x53, 0x1A])) {
-            return [
+        if ($this->checkForBytes(array(0x4E, 0x45, 0x53, 0x1A))) {
+            return array(
                 'ext' => 'nes',
                 'mime' => 'application/x-nintendo-nes-rom'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x43, 0x72, 0x32, 0x34])) {
-            return [
+        if ($this->checkForBytes(array(0x43, 0x72, 0x32, 0x34))) {
+            return array(
                 'ext' => 'crx',
                 'mime' => 'application/x-google-chrome-extension'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x4D, 0x53, 0x43, 0x46]) ||
-            $this->checkForBytes([0x49, 0x53, 0x63, 0x28])
+        if ($this->checkForBytes(array(0x4D, 0x53, 0x43, 0x46)) ||
+            $this->checkForBytes(array(0x49, 0x53, 0x63, 0x28))
         ) {
-            return [
+            return array(
                 'ext' => 'cab',
                 'mime' => 'application/vnd.ms-cab-compressed'
-            ];
+            );
         }
 
         // Needs to be before `ar` check
-        if ($this->checkForBytes([
+        if ($this->checkForBytes(array(
             0x21, 0x3C, 0x61, 0x72, 0x63, 0x68, 0x3E,
             0x0A, 0x64, 0x65, 0x62, 0x69, 0x61, 0x6E,
             0x2D, 0x62, 0x69, 0x6E, 0x61, 0x72, 0x79
-        ])) {
-            return [
+        ))) {
+            return array(
                 'ext' => 'deb',
                 'mime' => 'application/x-deb'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x21, 0x3C, 0x61, 0x72, 0x63, 0x68, 0x3E])) {
-            return [
+        if ($this->checkForBytes(array(0x21, 0x3C, 0x61, 0x72, 0x63, 0x68, 0x3E))) {
+            return array(
                 'ext' => 'ar',
                 'mime' => 'application/x-unix-archive'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0xED, 0xAB, 0xEE, 0xDB])) {
-            return [
+        if ($this->checkForBytes(array(0xED, 0xAB, 0xEE, 0xDB))) {
+            return array(
                 'ext' => 'rpm',
                 'mime' => 'application/x-rpm'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x1F, 0xA0]) || $this->checkForBytes([0x1F, 0x9D])) {
-            return [
+        if ($this->checkForBytes(array(0x1F, 0xA0)) || $this->checkForBytes(array(0x1F, 0x9D))) {
+            return array(
                 'ext' => 'Z',
                 'mime' => 'application/x-compress'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x4C, 0x5A, 0x49, 0x50])) {
-            return [
+        if ($this->checkForBytes(array(0x4C, 0x5A, 0x49, 0x50))) {
+            return array(
                 'ext' => 'lz',
                 'mime' => 'application/x-lzip'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1])) {
-            return [
+        if ($this->checkForBytes(array(0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1))) {
+            return array(
                 'ext' => 'msi',
                 'mime' => 'application/x-msi'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([
+        if ($this->checkForBytes(array(
                 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x05, 0x01,
                 0x01, 0x0D, 0x01, 0x02, 0x01, 0x01, 0x02
-        ])) {
-            return [
+        ))) {
+            return array(
                 'ext' => 'mxf',
                 'mime' => 'application/mxf'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x47], 4) &&
+        if ($this->checkForBytes(array(0x47), 4) &&
             (
-                $this->checkForBytes([0x47], 192) ||
-                $this->checkForBytes([0x47], 196)
+                $this->checkForBytes(array(0x47), 192) ||
+                $this->checkForBytes(array(0x47), 196)
             )
         ) {
-            return [
+            return array(
                 'ext' => 'mts',
                 'mime' => 'video/mp2t'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x42, 0x4C, 0x45, 0x4E, 0x44, 0x45, 0x52])) {
-            return [
+        if ($this->checkForBytes(array(0x42, 0x4C, 0x45, 0x4E, 0x44, 0x45, 0x52))) {
+            return array(
                 'ext' => 'blend',
                 'mime' => 'application/x-blender'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x42, 0x50, 0x47, 0xFB])) {
-            return [
+        if ($this->checkForBytes(array(0x42, 0x50, 0x47, 0xFB))) {
+            return array(
                 'ext' => 'bpg',
                 'mime' => 'image/bpg'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x00, 0x00, 0x00, 0x0C, 0x6A, 0x50, 0x20, 0x20, 0x0D, 0x0A, 0x87, 0x0A])) {
+        if ($this->checkForBytes(array(0x00, 0x00, 0x00, 0x0C, 0x6A, 0x50, 0x20, 0x20, 0x0D, 0x0A, 0x87, 0x0A))) {
             // JPEG-2000 family
-            if ($this->checkForBytes([0x6A, 0x70, 0x32, 0x20], 20)) {
-                return [
+            if ($this->checkForBytes(array(0x6A, 0x70, 0x32, 0x20), 20)) {
+                return array(
                     'ext' => 'jp2',
                     'mime' => 'image/jp2'
-                ];
+                );
             }
 
-            if ($this->checkForBytes([0x6A, 0x70, 0x78, 0x20], 20)) {
-                return [
+            if ($this->checkForBytes(array(0x6A, 0x70, 0x78, 0x20), 20)) {
+                return array(
                     'ext' => 'jpx',
                     'mime' => 'image/jpx'
-                ];
+                );
             }
 
-            if ($this->checkForBytes([0x6A, 0x70, 0x6D, 0x20], 20)) {
-                return [
+            if ($this->checkForBytes(array(0x6A, 0x70, 0x6D, 0x20), 20)) {
+                return array(
                     'ext' => 'jpm',
                     'mime' => 'image/jpm'
-                ];
+                );
             }
 
-            if ($this->checkForBytes([0x6D, 0x6A, 0x70, 0x32], 20)) {
-                return [
+            if ($this->checkForBytes(array(0x6D, 0x6A, 0x70, 0x32), 20)) {
+                return array(
                     'ext' => 'mj2',
                     'mime' => 'image/mj2'
-                ];
+                );
             }
         }
 
-        if ($this->checkForBytes([0x46, 0x4F, 0x52, 0x4D, 0x00])) {
-            return [
+        if ($this->checkForBytes(array(0x46, 0x4F, 0x52, 0x4D, 0x00))) {
+            return array(
                 'ext' => 'aif',
                 'mime' => 'audio/aiff'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x42, 0x4F, 0x4F, 0x4B, 0x4D, 0x4F, 0x42, 0x49], 60)) {
-            return [
+        if ($this->checkForBytes(array(0x42, 0x4F, 0x4F, 0x4B, 0x4D, 0x4F, 0x42, 0x49), 60)) {
+            return array(
                 'ext' => 'mobi',
                 'mime' => 'application/x-mobipocket-ebook'
-            ];
+            );
         }
 
         // File Type Box (https://en.wikipedia.org/wiki/ISO_base_media_file_format)
-        if ($this->checkForBytes([0x66, 0x74, 0x79, 0x70], 4)) {
-            if ($this->checkForBytes([0x6D, 0x69, 0x66, 0x31], 8)) {
-                return [
+        if ($this->checkForBytes(array(0x66, 0x74, 0x79, 0x70), 4)) {
+            if ($this->checkForBytes(array(0x6D, 0x69, 0x66, 0x31), 8)) {
+                return array(
                     'ext' => 'heic',
                     'mime' => 'image/heif'
-                ];
+                );
             }
 
-            if ($this->checkForBytes([0x6D, 0x73, 0x66, 0x31], 8)) {
-                return [
+            if ($this->checkForBytes(array(0x6D, 0x73, 0x66, 0x31), 8)) {
+                return array(
                     'ext' => 'heic',
                     'mime' => 'image/heif-sequence'
-                ];
+                );
             }
 
-            if ($this->checkForBytes([0x68, 0x65, 0x69, 0x63], 8) ||
-                $this->checkForBytes([0x68, 0x65, 0x69, 0x78], 8)
+            if ($this->checkForBytes(array(0x68, 0x65, 0x69, 0x63), 8) ||
+                $this->checkForBytes(array(0x68, 0x65, 0x69, 0x78), 8)
             ) {
-                return [
+                return array(
                     'ext' => 'heic',
                     'mime' => 'image/heic'
-                ];
+                );
             }
 
             // @codeCoverageIgnoreStart
-            if ($this->checkForBytes([0x68, 0x65, 0x76, 0x63], 8) ||
-                $this->checkForBytes([0x68, 0x65, 0x76, 0x78], 8)
+            if ($this->checkForBytes(array(0x68, 0x65, 0x76, 0x63), 8) ||
+                $this->checkForBytes(array(0x68, 0x65, 0x76, 0x78), 8)
             ) {
-                return [
+                return array(
                     'ext' => 'heic',
                     'mime' => 'image/heic-sequence'
-                ];
+                );
             }
             // @codeCoverageIgnoreEnd
         }
 
-        if ($this->checkForBytes([0xAB, 0x4B, 0x54, 0x58, 0x20, 0x31, 0x31, 0xBB, 0x0D, 0x0A, 0x1A, 0x0A])) {
-            return [
+        if ($this->checkForBytes(array(0xAB, 0x4B, 0x54, 0x58, 0x20, 0x31, 0x31, 0xBB, 0x0D, 0x0A, 0x1A, 0x0A))) {
+            return array(
                 'ext' => 'ktx',
                 'mime' => 'image/ktx'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x44, 0x49, 0x43, 0x4D], 128)) {
-            return [
+        if ($this->checkForBytes(array(0x44, 0x49, 0x43, 0x4D), 128)) {
+            return array(
                 'ext' => 'dcm',
                 'mime' => 'application/dicom'
-            ];
+            );
         }
 
-        if ($this->checkForBytes([0x1B, 0x4C, 0x75, 0x61])) {
-            return [
+        if ($this->checkForBytes(array(0x1B, 0x4C, 0x75, 0x61))) {
+            return array(
                 'ext' => 'luac',
                 'mime' => 'application/x-lua-bytecode'
-            ];
+            );
         }
 
         // this class is intended to detect binary files, only. But there's nothing wrong in
@@ -980,53 +979,53 @@ class MimeDetector
                 $this->searchForBytes($this->toBytes('<!DOCTYPE svg'), 6) !== -1 ||
                 $this->searchForBytes($this->toBytes('<svg'), 6) !== -1
             ) {
-                return [
+                return array(
                     'ext' => 'svg',
                     'mime' => 'image/svg+xml'
-                ];
+                );
             }
 
             if ($this->searchForBytes($this->toBytes('<!doctype html'), 6) !== -1 ||
                 $this->searchForBytes($this->toBytes('<!DOCTYPE html'), 6) !== -1 ||
                 $this->searchForBytes($this->toBytes('<html'), 6) !== -1
             ) {
-                return [
+                return array(
                     'ext' => 'html',
                     'mime' => 'text/html'
-                ];
+                );
             }
 
             if ($this->searchForBytes($this->toBytes('<rdf:RDF'), 6) !== -1) {
-                return [
+                return array(
                     'ext' => 'rdf',
                     'mime' => 'application/rdf+xml'
-                ];
+                );
             }
 
             if ($this->searchForBytes($this->toBytes('<rss version="2.0"'), 6) !== -1) {
-                return [
+                return array(
                     'ext' => 'rss',
                     'mime' => 'application/rss+xml'
-                ];
+                );
             }
 
-            return [
+            return array(
                 'ext' => 'xml',
                 'mime' => 'application/xml'
-            ];
+            );
         }
 
         if ($this->checkString('<!doctype html') ||
             $this->checkString('<!DOCTYPE html') ||
             $this->checkString('<html')
         ) {
-            return [
+            return array(
                 'ext' => 'html',
                 'mime' => 'text/html'
-            ];
+            );
         }
 
-        return [];
+        return array();
     }
 
     /**
@@ -1034,7 +1033,7 @@ class MimeDetector
      *
      * @return  string
      */
-    public function getFileExtension(): string
+    public function getFileExtension()
     {
         $fileType = $this->getFileType();
 
@@ -1050,7 +1049,7 @@ class MimeDetector
      *
      * @return  string
      */
-    public function getMimeType(): string
+    public function getMimeType()
     {
         $fileType = $this->getFileType();
 
@@ -1068,7 +1067,7 @@ class MimeDetector
      * @param   bool    $fixedWidth
      * @return  string
      */
-    public function getFontAwesomeIcon(string $fileMimeType = '', bool $fixedWidth = false): string
+    public function getFontAwesomeIcon($fileMimeType = '', $fixedWidth = false)
     {
         $iconClass = 'fa-file-o';
 
@@ -1093,7 +1092,7 @@ class MimeDetector
      * @param   string  $str
      * @return  string
      */
-    public function getHash(string $str): string
+    public function getHash($str)
     {
         if (file_exists($str)) {
             return hash_file('crc32b', $str);
@@ -1108,7 +1107,7 @@ class MimeDetector
      * @param   string  $str
      * @return  array
      */
-    public function toBytes(string $str): array
+    public function toBytes($str)
     {
         return array_values(unpack('C*', $str));
     }
@@ -1120,7 +1119,7 @@ class MimeDetector
      * @param   int     $offset
      * @return  bool
      */
-    protected function checkString(string $str, int $offset = 0): bool
+    protected function checkString($str, $offset = 0)
     {
         return $this->checkForBytes($this->toBytes($str), $offset);
     }
@@ -1134,7 +1133,7 @@ class MimeDetector
      * @param   array   $mask
      * @return  int
      */
-    protected function searchForBytes(array $bytes, int $offset = 0, array $mask = []): int
+    protected function searchForBytes(array $bytes, $offset = 0, array $mask = array())
     {
         $limit = $this->byteCacheLen - count($bytes);
 
@@ -1155,7 +1154,7 @@ class MimeDetector
      * @param   array   $mask
      * @return  bool
      */
-    protected function checkForBytes(array $bytes, int $offset = 0, array $mask = []): bool
+    protected function checkForBytes(array $bytes, $offset = 0, array $mask = array())
     {
         if (empty($bytes) || empty($this->byteCache)) {
             return false;
@@ -1186,7 +1185,7 @@ class MimeDetector
      * @return  void
      * @throws  MimeDetectorException
      */
-    protected function createByteCache(): void
+    protected function createByteCache()
     {
         if (!empty($this->byteCache)) {
             return;

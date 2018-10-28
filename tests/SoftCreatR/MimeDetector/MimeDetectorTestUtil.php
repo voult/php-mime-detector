@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 
 namespace SoftCreatR\Tests\MimeDetector;
 
@@ -21,8 +20,12 @@ class MimeDetectorTestUtil
      * @return  ReflectionMethod
      * @throws  ReflectionException
      */
-    public static function getPrivateMethod(MimeDetector $obj, string $methodName): ReflectionMethod
+    public static function getPrivateMethod($obj, $methodName)
     {
+        if (!$obj instanceof MimeDetector) {
+            throw new ReflectionException('No MimeDetector object provided.');
+        }
+        
         $class = new ReflectionClass($obj);
 
         if (!$class->hasMethod($methodName)) {
@@ -48,8 +51,12 @@ class MimeDetectorTestUtil
      * @return  ReflectionMethod
      * @throws  ReflectionException
      */
-    public static function getProtectedMethod(MimeDetector $obj, string $methodName): ReflectionMethod
+    public static function getProtectedMethod($obj, $methodName)
     {
+        if (!$obj instanceof MimeDetector) {
+            throw new ReflectionException('No MimeDetector object provided.');
+        }
+        
         $class = new ReflectionClass($obj);
 
         if (!$class->hasMethod($methodName)) {
@@ -76,8 +83,12 @@ class MimeDetectorTestUtil
      * @return  void
      * @throws  ReflectionException
      */
-    public static function setProtectedProperty(MimeDetector $obj, string $propertyName, $value = null): void
+    public static function setProtectedProperty($obj, $propertyName, $value = null)
     {
+        if (!$obj instanceof MimeDetector) {
+            throw new ReflectionException('No MimeDetector object provided.');
+        }
+        
         $class = new ReflectionClass($obj);
 
         if (!$class->hasProperty($propertyName)) {
@@ -104,8 +115,12 @@ class MimeDetectorTestUtil
      * @return  void
      * @throws  ReflectionException
      */
-    public static function setPrivateProperty(MimeDetector $obj, string $propertyName, $value = null): void
+    public static function setPrivateProperty($obj, $propertyName, $value = null)
     {
+        if (!$obj instanceof MimeDetector) {
+            throw new ReflectionException('No MimeDetector object provided.');
+        }
+        
         $class = new ReflectionClass($obj);
 
         if (!$class->hasProperty($propertyName)) {
