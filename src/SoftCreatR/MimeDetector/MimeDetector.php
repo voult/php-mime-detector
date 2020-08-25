@@ -1,5 +1,4 @@
 <?php
-
 namespace SoftCreatR\MimeDetector;
 
 /**
@@ -11,13 +10,6 @@ namespace SoftCreatR\MimeDetector;
  */
 class MimeDetector
 {
-    /**
-     * Current instance
-     *
-     * @var MimeDetector
-     */
-    private static $instance;
-
     /**
      * Cached first X bytes of the given file
      *
@@ -31,6 +23,13 @@ class MimeDetector
      * @var integer
      */
     private $byteCacheLen = 0;
+
+    /**
+     * Maximum number of bytes to cache
+     *
+     * @var integer
+     */
+    private $maxByteCacheLen = 0;
 
     /**
      * Path to the given file
@@ -73,59 +72,10 @@ class MimeDetector
     );
 
     /**
-     * Singletons do not support a public constructor. Override init() if
-     * you need to initialize components on creation.
-     *
-     * @codeCoverageIgnore
+     * Create a new MimeDetector object.
      */
-    final protected function __construct()
+    public function __construct()
     {
-        $this->init();
-    }
-
-    /**
-     * Called within __construct(), override if necessary.
-     *
-     * @codeCoverageIgnore
-     */
-    protected function init()
-    {
-    }
-
-    /**
-     * Object cloning is disallowed.
-     *
-     * @codeCoverageIgnore
-     */
-    final protected function __clone()
-    {
-    }
-
-    /**
-     * Object serializing is disallowed.
-     *
-     * @throws MimeDetectorException
-     * @codeCoverageIgnore
-     */
-    final public function __sleep()
-    {
-        throw new MimeDetectorException('Serializing of Singletons is not allowed');
-    }
-
-    /**
-     * Returns an unique instance of the MimeDetector class.
-     *
-     * @return  MimeDetector
-     */
-    public static function getInstance()
-    {
-        // @codeCoverageIgnoreStart
-        if (empty(self::$instance)) {
-            self::$instance = new MimeDetector();
-        }
-        // @codeCoverageIgnoreEnd
-
-        return self::$instance;
     }
 
     /**
@@ -143,15 +93,16 @@ class MimeDetector
 
         $fileHash = $this->getHash($filePath);
 
-        if ($this->fileHash !== $fileHash) {
+        if ($this->getFileHash() !== $fileHash) {
             $this->byteCache = array();
             $this->byteCacheLen = 0;
+            $this->maxByteCacheLen = $this->getByteCacheMaxLength() ?: 4096;
             $this->file = $filePath;
             $this->fileHash = $fileHash;
 
             $this->createByteCache();
         }
-        
+
         return $this;
     }
 
@@ -203,10 +154,10 @@ class MimeDetector
         }
 
         // Needs to be before `tif` check
-        if ((
+        if ($this->checkForBytes(array(0x43, 0x52), 8) && (
                 $this->checkForBytes(array(0x49, 0x49, 0x2A, 0x0)) ||
                 $this->checkForBytes(array(0x4D, 0x4D, 0x0, 0x2A))
-            ) && $this->checkForBytes(array(0x43, 0x52), 8)
+            )
         ) {
             return array(
                 'ext' => 'cr2',
@@ -252,8 +203,7 @@ class MimeDetector
                 0x65, 0x61, 0x70, 0x70, 0x6C, 0x69, 0x63,
                 0x61, 0x74, 0x69, 0x6F, 0x6E, 0x2F, 0x65,
                 0x70, 0x75, 0x62, 0x2B, 0x7A, 0x69, 0x70
-            ), 30)
-            ) {
+            ), 30)) {
                 return array(
                     'ext' => 'epub',
                     'mime' => 'application/epub+zip'
@@ -334,9 +284,7 @@ class MimeDetector
             if ($type) {
                 return $type;
             }
-        }
 
-        if ($this->checkForBytes(array(0x50, 0x4B, 0x3, 0x4))) {
             return array(
                 'ext' => 'zip',
                 'mime' => 'application/zip'
@@ -350,11 +298,11 @@ class MimeDetector
             );
         }
 
-        if ($this->checkForBytes(array(0x52, 0x61, 0x72, 0x21, 0x1A, 0x7)) &&
+        if (
             (
                 $this->byteCache[6] === 0x0 ||
-                $this->byteCache[6] === 0x1
-            )
+                $this->byteCache[6] === 0x1) &&
+            $this->checkForBytes(array(0x52, 0x61, 0x72, 0x21, 0x1A, 0x7))
         ) {
             return array(
                 'ext' => 'rar',
@@ -475,6 +423,15 @@ class MimeDetector
                     'mime' => 'audio/qcelp'
                 );
             }
+
+            // animated cursors
+            // mime type might be wrong, but there's not much information about the "correct" one
+            if ($this->checkForBytes(array(0x41, 0x43, 0x4F, 0x4E), 8)) {
+                return array(
+                    'ext' => 'ani',
+                    'mime' => 'application/x-navi-animation'
+                );
+            }
         }
 
         if ($this->checkForBytes(array(0x30, 0x26, 0xB2, 0x75, 0x8E, 0x66, 0xCF, 0x11, 0xA6, 0xD9))) {
@@ -499,7 +456,7 @@ class MimeDetector
         }
 
         // Check for MPEG header at different starting offsets
-        for ($offset = 0; ($offset < 2 && $offset < ($this->byteCacheLen - 16)); $offset++) {
+        for ($offset = 0; ($offset < 2 && $offset < ($this->getByteCacheLen() - 16)); $offset++) {
             if ($this->checkForBytes(array(0x49, 0x44, 0x33), $offset) || // ID3 header
                 $this->checkForBytes(array(0xFF, 0xE2), $offset, array(0xFF, 0xE2)) // MPEG 1 or 2 Layer 3 header
             ) {
@@ -814,7 +771,7 @@ class MimeDetector
 
         if ($this->checkForBytes(array(0x1F, 0xA0)) || $this->checkForBytes(array(0x1F, 0x9D))) {
             return array(
-                'ext' => 'Z',
+                'ext' => 'z',
                 'mime' => 'application/x-compress'
             );
         }
@@ -827,6 +784,18 @@ class MimeDetector
         }
 
         if ($this->checkForBytes(array(0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1))) {
+            // MS Visio
+            if ($this->checkForBytes(array(
+                0x56, 0x00, 0x69, 0x00, 0x73,
+                0x00, 0x69, 0x00, 0x6F, 0x00,
+                0x44, 0x00, 0x6F, 0x00, 0x63
+            ), 1664)) {
+                return array(
+                    'ext' => 'vsd',
+                    'mime' => 'application/vnd.visio'
+                );
+            }
+
             return array(
                 'ext' => 'msi',
                 'mime' => 'application/x-msi'
@@ -834,8 +803,8 @@ class MimeDetector
         }
 
         if ($this->checkForBytes(array(
-                0x06, 0x0E, 0x2B, 0x34, 0x02, 0x05, 0x01,
-                0x01, 0x0D, 0x01, 0x02, 0x01, 0x01, 0x02
+            0x06, 0x0E, 0x2B, 0x34, 0x02, 0x05, 0x01,
+            0x01, 0x0D, 0x01, 0x02, 0x01, 0x01, 0x02
         ))) {
             return array(
                 'ext' => 'mxf',
@@ -949,6 +918,13 @@ class MimeDetector
                 );
             }
             // @codeCoverageIgnoreEnd
+
+            if ($this->checkForBytes(array(0x61, 0x76, 0x69, 0x66), 8)) {
+                return array(
+                    'ext' => 'avif',
+                    'mime' => 'image/avif'
+                );
+            }
         }
 
         if ($this->checkForBytes(array(0xAB, 0x4B, 0x54, 0x58, 0x20, 0x31, 0x31, 0xBB, 0x0D, 0x0A, 0x1A, 0x0A))) {
@@ -969,6 +945,28 @@ class MimeDetector
             return array(
                 'ext' => 'luac',
                 'mime' => 'application/x-lua-bytecode'
+            );
+        }
+
+        if ($this->checkForBytes(array(0x64, 0x6E, 0x73, 0x2E)) || $this->checkForBytes(array(0x2E, 0x73, 0x6E, 0x64))) {
+            return array(
+                'ext' => 'au',
+                'mime' => 'audio/basic'
+            );
+        }
+
+        // unfortunately, these formats don't have a proper mime type, but they are worth detecting
+        if ($this->checkForBytes(array(0x67, 0x33, 0x64, 0x72, 0x65, 0x6D))) {
+            return array(
+                'ext' => 'g3drem',
+                'mime' => 'application/octet-stream'
+            );
+        }
+
+        if ($this->checkForBytes(array(0x73, 0x69, 0x6c, 0x68, 0x6f, 0x75, 0x65, 0x74, 0x74, 0x65, 0x30, 0x35))) {
+            return array(
+                'ext' => 'studio3',
+                'mime' => 'application/octet-stream'
             );
         }
 
@@ -1087,6 +1085,31 @@ class MimeDetector
     }
 
     /**
+     * Returns the data URI of the given file in base64 format.
+     *
+     * @return  string
+     */
+    public function getBase64DataURI()
+    {
+        $fileMimeType = $this->getMimeType();
+        $base64String = base64_encode(file_get_contents($this->file));
+
+        if (!empty($fileMimeType) && !empty($base64String)) {
+            return 'data:' . $fileMimeType . ';base64,' . $base64String;
+        }
+
+        return '';
+    }
+
+    /**
+     * @return string
+     */
+    public function getFile()
+    {
+        return $this->file;
+    }
+
+    /**
      * Returns the crc32b hash of a given string.
      *
      * @param   string  $str
@@ -1102,6 +1125,14 @@ class MimeDetector
     }
 
     /**
+     * @return string
+     */
+    public function getFileHash()
+    {
+        return $this->fileHash;
+    }
+
+    /**
      * Returns the byte sequence of a given string.
      *
      * @param   string  $str
@@ -1110,6 +1141,38 @@ class MimeDetector
     public function toBytes($str)
     {
         return array_values(unpack('C*', $str));
+    }
+
+    /**
+     * Allows to define the max byte cache length for a file. This can be useful in cases,
+     * when you expect files, where the magic number should be found within the first X bytes.
+     * However, the byte cache should have at least a length of 4 for a proper detection.
+     *
+     * @param   int  $maxLength
+     * @return  MimeDetector
+     * @throws  MimeDetectorException
+     */
+    public function setByteCacheMaxLength($maxLength)
+    {
+        if ($this->getByteCacheLen() > 0) {
+            throw new MimeDetectorException('setByteCacheMaxLength() must be called before setFile().');
+        }
+
+        if ($maxLength < 4) {
+            throw new MimeDetectorException('Maximum byte cache length must not be smaller than 4.');
+        }
+
+        $this->maxByteCacheLen = $maxLength;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getByteCacheMaxLength()
+    {
+        return $this->maxByteCacheLen;
     }
 
     /**
@@ -1160,18 +1223,16 @@ class MimeDetector
             return false;
         }
 
-        // make sure we have nummeric indices
+        // make sure we have numeric indices
         $bytes = array_values($bytes);
 
         foreach ($bytes as $i => $byte) {
             if (!empty($mask)) {
-                if (!isset($this->byteCache[$offset + $i]) ||
-                    !isset($mask[$i]) ||
-                    $byte !== ($mask[$i] & $this->byteCache[$offset + $i])
+                if (!isset($this->byteCache[$offset + $i], $mask[$i]) || $byte !== ($mask[$i] & $this->byteCache[$offset + $i])
                 ) {
                     return false;
                 }
-            } elseif (!isset($this->byteCache[$offset + $i]) || $this->byteCache[$offset + $i] != $byte) {
+            } elseif (!isset($this->byteCache[$offset + $i]) || $this->byteCache[$offset + $i] !== $byte) {
                 return false;
             }
         }
@@ -1180,7 +1241,16 @@ class MimeDetector
     }
 
     /**
-     * Caches the first 4096 bytes of the given file, so we don't have to read the whole file on every iteration.
+     * @return array
+     */
+    public function getByteCache()
+    {
+        return $this->byteCache;
+    }
+
+    /**
+     * Caches the first X bytes (4096 by default) of the given file,
+     * so we don't have to read the whole file on every iteration.
      *
      * @return  void
      * @throws  MimeDetectorException
@@ -1196,7 +1266,7 @@ class MimeDetector
         }
 
         $handle = fopen($this->file, 'rb');
-        $data = fread($handle, 4096);
+        $data = fread($handle, $this->getByteCacheMaxLength());
         fclose($handle);
 
         foreach (str_split($data) as $i => $char) {
@@ -1204,5 +1274,13 @@ class MimeDetector
         }
 
         $this->byteCacheLen = count($this->byteCache);
+    }
+
+    /**
+     * @return int
+     */
+    public function getByteCacheLen()
+    {
+        return $this->byteCacheLen;
     }
 }

@@ -1,5 +1,4 @@
 <?php
-
 namespace SoftCreatR\Tests\MimeDetector;
 
 use DirectoryIterator;
@@ -18,27 +17,19 @@ class MimeDetectorTest extends TestCaseImplementation
      */
     public function getInstance()
     {
-        return MimeDetector::getInstance();
-    }
-
-    /**
-     * @return  void
-     */
-    public function testGetInstance()
-    {
-        self::assertInstanceOf('\SoftCreatR\MimeDetector\MimeDetector', $this->getInstance());
+        return new MimeDetector();
     }
 
     /**
      * Test, if `setFile` throws an exception, if the provided file does not exist.
      *
-     * @return              void
-     * @throws              MimeDetectorException
-     * @expectedException   \SoftCreatR\MimeDetector\MimeDetectorException
+     * @return  void
+     * @throws  MimeDetectorException
      */
     public function testSetFileThrowsException()
     {
-        $this->getInstance()->setFile('nonexistant.file');
+        $this->setExpectedException('\SoftCreatR\MimeDetector\MimeDetectorException');
+        $this->getInstance()->setFile('nonexistent.file');
     }
 
     /**
@@ -49,15 +40,15 @@ class MimeDetectorTest extends TestCaseImplementation
      */
     public function testSetFile($testFiles)
     {
-        $mimeDetector = $this->getInstance();
-
         foreach ($testFiles as $testFile) {
+            $mimeDetector = $this->getInstance();
             $mimeDetector->setFile($testFile['file']);
 
-            self::assertAttributeNotEmpty('byteCache', $mimeDetector);
-            self::assertAttributeGreaterThanOrEqual(1, 'byteCacheLen', $mimeDetector);
-            self::assertAttributeSame($testFile['file'], 'file', $mimeDetector);
-            self::assertAttributeSame($testFile['hash'], 'fileHash', $mimeDetector);
+            self::assertNotEmpty($mimeDetector->getByteCache());
+            self::assertGreaterThanOrEqual(1, $mimeDetector->getByteCacheLen());
+            self::assertEquals(4096, $mimeDetector->getByteCacheMaxLength());
+            self::assertSame($testFile['file'], $mimeDetector->getFile());
+            self::assertSame($testFile['hash'], $mimeDetector->getFileHash());
         }
     }
 
@@ -134,7 +125,6 @@ class MimeDetectorTest extends TestCaseImplementation
     /**
      * Test, if `getMimeType` returns an empty string, if the file type of the provided file cannot be determined.
      *
-     * @dataProvider    provideTestFiles
      * @return          void
      * @throws          MimeDetectorException
      */
@@ -145,7 +135,7 @@ class MimeDetectorTest extends TestCaseImplementation
 
     /**
      * @dataProvider    provideTestFiles
-     * @param           array $testFiles
+     * @param           array   $testFiles
      * @return          void
      * @throws          MimeDetectorException
      */
@@ -159,9 +149,9 @@ class MimeDetectorTest extends TestCaseImplementation
 
     /**
      * @dataProvider    provideFontAwesomeIcons
-     * @param   array   $fontAwesomeIcons
-     * @return  void
-     * @throws  MimeDetectorException
+     * @param           array   $fontAwesomeIcons
+     * @return          void
+     * @throws          MimeDetectorException
      */
     public function testGetFontAwesomeIcon(array $fontAwesomeIcons)
     {
@@ -176,6 +166,32 @@ class MimeDetectorTest extends TestCaseImplementation
     }
 
     /**
+     * Test, if `getMimeType` returns an empty string, if the mime type of the provided file cannot be determined.
+     *
+     * @return          void
+     * @throws          MimeDetectorException
+     */
+    public function testGetBase64DataURIReturnsEmptyString()
+    {
+        self::assertEmpty($this->getInstance()->setFile(__FILE__)->getBase64DataURI());
+    }
+
+    /**
+     * @dataProvider    provideSingleTestFile
+     * @param           array $testFile
+     * @return          void
+     * @throws          MimeDetectorException
+     */
+    public function testGetBase64DataURI(array $testFile)
+    {
+        $mimeDetector = $this->getInstance()->setFile($testFile['file']);
+        $base64String = base64_encode(file_get_contents($testFile['file']));
+        $fileMimeType = $mimeDetector->getMimeType();
+
+        self::assertSame('data:' . $fileMimeType . ';base64,' . $base64String, $mimeDetector->getBase64DataURI());
+    }
+
+    /**
      * Test, if `getHash` returns the crc32b hash for this test class.
      *
      * @return void
@@ -184,7 +200,7 @@ class MimeDetectorTest extends TestCaseImplementation
     {
         self::assertNotFalse($this->getInstance()->getHash(__FILE__));
     }
-    
+
     /**
      * @return void
      */
@@ -199,6 +215,46 @@ class MimeDetectorTest extends TestCaseImplementation
     public function testToBytes()
     {
         self::assertEquals(array(112, 104, 112), $this->getInstance()->toBytes('php'));
+    }
+
+    /**
+     * Test, if `setByteCacheMaxLength` throws an exception, when being called too late.
+     *
+     * @return  void
+     * @throws  MimeDetectorException
+     */
+    public function testSetByteCacheMaxLengthThrowsExceptionWrongOrder()
+    {
+        $this->setExpectedException('\SoftCreatR\MimeDetector\MimeDetectorException');
+        $this->getInstance()->setFile(__FILE__)->setByteCacheMaxLength(123);
+    }
+
+    /**
+     * Test, if `setByteCacheMaxLength` throws an exception, if the given max length is too small.
+     *
+     * @return  void
+     * @throws  MimeDetectorException
+     */
+    public function testSetByteCacheMaxLengthThrowsExceptionTooSmall()
+    {
+        $this->setExpectedException('\SoftCreatR\MimeDetector\MimeDetectorException');
+        $this->getInstance()->setByteCacheMaxLength(3);
+    }
+
+    /**
+     * @return  void
+     * @throws  MimeDetectorException
+     */
+    public function testSetByteCacheMaxLength()
+    {
+        $mimeDetector = $this->getInstance();
+
+        $mimeDetector->setByteCacheMaxLength(5);
+        $mimeDetector->setFile(__FILE__);
+
+        self::assertEquals(5, $mimeDetector->getByteCacheMaxLength());
+        self::assertEquals(5, $mimeDetector->getByteCacheLen());
+        self::assertSame($mimeDetector->toBytes('<?php'), $mimeDetector->getByteCache());
     }
 
     /**
@@ -297,10 +353,11 @@ class MimeDetectorTest extends TestCaseImplementation
      * @return  void
      * @throws  MimeDetectorException
      * @throws  ReflectionException
-     * @expectedException   \SoftCreatR\MimeDetector\MimeDetectorException
      */
     public function testCreateByteCacheException()
     {
+        $this->setExpectedException('\SoftCreatR\MimeDetector\MimeDetectorException');
+
         $mimeDetector = $this->getInstance();
         $mimeDetector->setFile(__FILE__);
 
@@ -326,12 +383,38 @@ class MimeDetectorTest extends TestCaseImplementation
                 $files[$file->getBasename()] = array(
                     'file' => $file->getPathname(),
                     'hash' => $this->getInstance()->getHash($file->getPathname()),
-                    'ext' => $file->getExtension()
+                    'ext' => strtolower($file->getExtension())
                 );
             }
         }
 
         return array(array($files));
+    }
+
+    /**
+     * Returns the first test file within the fixtures directory.
+     *
+     * @return array
+     */
+    public function provideSingleTestFile()
+    {
+        $fileInfo = array();
+
+        foreach (new DirectoryIterator(__DIR__ . '/fixtures') as $file) {
+            if (!empty($fileInfo)) {
+                break;
+            }
+
+            if ($file->isFile() && $file->getBasename() !== '.git') {
+                $fileInfo = array(
+                    'file' => $file->getPathname(),
+                    'hash' => $this->getInstance()->getHash($file->getPathname()),
+                    'ext' => strtolower($file->getExtension())
+                );
+            }
+        }
+
+        return array(array($fileInfo));
     }
 
     /**

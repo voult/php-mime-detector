@@ -26,7 +26,7 @@ Short answer: I have just little experience in unit testing. This project was a 
 
 ## Requirements
 
--   PHP 5.3.2 or newer
+-   PHP 5.4 or newer (up to 7.0)
 -   [Composer](https://getcomposer.org)
 
 ## Installation
